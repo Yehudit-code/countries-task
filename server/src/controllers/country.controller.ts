@@ -1,5 +1,26 @@
 import { Request, Response } from "express";
-import { deleteCountryById, getAllCountries, getCountryById, updateCountryById  } from "../services/country.service";
+import { createCountry, getAllCountries, getCountryById, updateCountryById, deleteCountryById } from "../services/country.service";
+
+export const createCountryController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const country = await createCountry(req.body);
+    res.status(201).json(country);
+  } catch (error: any) {
+    // Handles duplicate country name (unique index)
+    if (error.code === 11000) {
+      return res.status(409).json({
+        message: "Country with this name already exists"
+      });
+    }
+
+    res.status(400).json({
+      message: "Failed to create country"
+    });
+  }
+};
 
 export const getCountriesController = async (
   _req: Request,

@@ -1,3 +1,4 @@
+import axios from "axios";
 import type { Country } from "../types/country";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -6,41 +7,49 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL;
  * Import countries if the database is empty
  */
 export async function importCountriesIfEmpty(): Promise<void> {
-    const res = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/countries/import`,
-        {
-            method: "POST",
-        }
-    );
-
-    if (!res.ok) {
-        throw new Error("Failed to import countries");
-    }
+  await axios.post(`${BASE_URL}/countries/import`);
 }
 
-
 /**
- * Fetch countries from server and normalize MongoDB _id
+ * Fetch all countries
  */
 export async function fetchCountries(): Promise<Country[]> {
-  const res = await fetch(`${BASE_URL}/countries`);
-  if (!res.ok) {
-    throw new Error("Failed to fetch countries");
-  }
+  const res = await axios.get<Country[]>(`${BASE_URL}/countries`);
+  return res.data;
+}
 
-  return res.json();
+/**
+ * Get country by id
+ */
+export async function getCountryById(id: string): Promise<Country> {
+  const res = await axios.get<Country>(`${BASE_URL}/countries/${id}`);
+  return res.data;
+}
+
+/**
+ * Create new country
+ */
+export async function createCountry(
+  data: Partial<Country>
+): Promise<Country> {
+  const res = await axios.post<Country>(`${BASE_URL}/countries`, data);
+  return res.data;
+}
+
+/**
+ * Update country by id
+ */
+export async function updateCountry(
+  id: string,
+  data: Partial<Country>
+): Promise<Country> {
+  const res = await axios.put<Country>(`${BASE_URL}/countries/${id}`, data);
+  return res.data;
 }
 
 /**
  * Delete country by id
  */
 export async function deleteCountry(id: string): Promise<void> {
-    const res = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/countries/${id}`,
-        { method: "DELETE" }
-    );
-
-    if (!res.ok) {
-        throw new Error("Failed to delete country");
-    }
+  await axios.delete(`${BASE_URL}/countries/${id}`);
 }

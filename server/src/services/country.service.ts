@@ -1,8 +1,19 @@
-import { Country } from "../models/country.model";
+import { Country, CountryDocument } from "../models/country.model";
+
+export const createCountry = async (
+  data: {
+    name: string;
+    flag: string;
+    population: number;
+    region: string;
+  }
+): Promise<CountryDocument> => {
+  const country = await Country.create(data);
+  return country;
+};
 
 export const getAllCountries = async () => {
-  const countries = await Country.find().sort({ name: 1 });
-  return countries;
+  return Country.find().sort({ name: 1 });
 };
 
 export const getCountryById = async (id: string) => {

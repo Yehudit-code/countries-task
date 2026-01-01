@@ -1,0 +1,16 @@
+.container {
+  max-width: 420px;
+  margin: 40px auto;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.dialogActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
