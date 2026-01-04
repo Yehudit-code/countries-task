@@ -10,6 +10,10 @@
     "verbatimModuleSyntax": false,
 
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+     "baseUrl": "./src",
+    "paths": {
+      "@/*": ["*"]
+    }
   }
 }

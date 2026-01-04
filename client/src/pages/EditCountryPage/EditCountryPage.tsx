@@ -29,7 +29,6 @@ import { selectedCountryNameState } from "../../store/selectedCountryState";
 export default function EditCountryPage() {
   const { id } = useParams<{ id?: string }>();
   const isEditMode = Boolean(id);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -41,10 +40,11 @@ export default function EditCountryPage() {
   const [showConfirmExit, setShowConfirmExit] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
   const [errorOpen, setErrorOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  /* ---------- Fetch country only in edit mode ---------- */
+  /* ---------- Fetch country (cache-first) ---------- */
   const { data, isLoading } = useQuery<Country>({
-    queryKey: ["country", id],
+    queryKey: ["countries", id],
     queryFn: () => getCountryById(id as string),
     enabled: isEditMode,
     initialData: () => {
@@ -107,8 +107,8 @@ export default function EditCountryPage() {
           flag: data?.flag || "",
         }}
         validationSchema={countrySchema}
-        onSubmit={(values) => mutation.mutate(values)}
         enableReinitialize
+        onSubmit={(values) => mutation.mutate(values)}
       >
         {({ errors, touched, dirty, isValid }) => (
           <Form>

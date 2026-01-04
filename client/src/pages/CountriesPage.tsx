@@ -1,10 +1,6 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  fetchCountries,
-  deleteCountry,
-  importCountriesIfEmpty,
-} from "../api/countries.api";
+import { useCountriesQuery } from "../hooks/useCountriesQuery";
+import { useDeleteCountry } from "../hooks/useDeleteCountry";
 import CountriesDataGrid from "../components/CountriesDataGrid";
 import {
   CircularProgress,
@@ -22,43 +18,21 @@ import { useNavigate } from "react-router-dom";
 import type { Country } from "../types/country";
 
 export default function CountriesPage() {
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
-
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [deleteSuccessOpen, setDeleteSuccessOpen] = useState(false);
   const [deleteErrorOpen, setDeleteErrorOpen] = useState(false);
 
-  // Fetch countries
+  /* ---------- Fetch countries (via cache hook) ---------- */
   const {
     data: countries,
     isLoading,
     isError,
-  } = useQuery<Country[]>({
-    queryKey: ["countries"],
-    queryFn: fetchCountries,
-  });
+  } = useCountriesQuery();
 
-  // Import countries (only if DB is empty)
-  const importMutation = useMutation({
-    mutationFn: importCountriesIfEmpty,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["countries"] });
-    },
-  });
+  const safeCountries = Array.isArray(countries) ? countries : [];
 
-  // Delete country
-  const deleteMutation = useMutation({
-    mutationFn: deleteCountry,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["countries"] });
-      setDeleteSuccessOpen(true);
-      setSelectedId(null);
-    },
-    onError: () => {
-      setDeleteErrorOpen(true);
-    },
-  });
+  const deleteMutation = useDeleteCountry();
 
   if (isLoading) {
     return <CircularProgress />;
@@ -68,18 +42,11 @@ export default function CountriesPage() {
     return <Alert severity="error">Failed to load countries</Alert>;
   }
 
+
   return (
     <>
       {/* Action buttons */}
-      <Stack direction="row" spacing={2} mb={2}>
-        <Button
-          variant="contained"
-          onClick={() => importMutation.mutate()}
-          disabled={importMutation.isPending}
-        >
-          Import Countries
-        </Button>
-
+      <Stack direction="row" spacing={2} mb={2} padding={2}>
         <Button
           variant="contained"
           color="success"
@@ -92,7 +59,7 @@ export default function CountriesPage() {
 
       {/* Countries table */}
       <CountriesDataGrid
-        countries={countries ?? []}
+        countries={safeCountries}
         onDelete={(id) => setSelectedId(id)}
       />
 
@@ -105,12 +72,23 @@ export default function CountriesPage() {
           <Button onClick={() => setSelectedId(null)}>Cancel</Button>
           <Button
             color="error"
-            onClick={() =>
-              selectedId && deleteMutation.mutate(selectedId)
-            }
+            onClick={() => {
+              if (!selectedId) return;
+
+              deleteMutation.mutate(selectedId, {
+                onSuccess: () => {
+                  setDeleteSuccessOpen(true);
+                  setSelectedId(null);
+                },
+                onError: () => {
+                  setDeleteErrorOpen(true);
+                },
+              });
+            }}
           >
             Delete
           </Button>
+
         </DialogActions>
       </Dialog>
 
