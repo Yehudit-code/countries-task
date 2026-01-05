@@ -24,6 +24,16 @@ import { selectedCountryNameState } from "../../store/selectedCountryState";
 
 import { useUpdateCountry } from "../../hooks/useUpdateCountry";
 import { useCreateCountry } from "../../hooks/useCreateCountry";
+import { useSnackbar } from "../../hooks/useSnackbar";
+
+import {
+  SUCCESS_MESSAGES,
+  ERROR_MESSAGES,
+} from "../../constants/messages";
+
+import {
+  EXIT_WITHOUT_SAVING_DIALOG,
+} from "../../constants/dialogTexts";
 
 export default function EditCountryPage() {
   const { id } = useParams<{ id?: string }>();
@@ -37,12 +47,11 @@ export default function EditCountryPage() {
   );
 
   const [showConfirmExit, setShowConfirmExit] = useState(false);
-  const [successOpen, setSuccessOpen] = useState(false);
-  const [errorOpen, setErrorOpen] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const updateMutation = useUpdateCountry();
   const createMutation = useCreateCountry();
+
+  const snackbar = useSnackbar();
 
   /* ---------- Fetch country (cache-first) ---------- */
   const { data, isLoading } = useQuery<Country>({
@@ -70,17 +79,6 @@ export default function EditCountryPage() {
     };
   }, [isEditMode, data, setSelectedCountryName]);
 
-  /* ---------- Handle success ---------- */
-  useEffect(() => {
-    if (updateMutation.isSuccess || createMutation.isSuccess) {
-      setSuccessOpen(true);
-
-      setTimeout(() => {
-        navigate("/");
-      }, 1200);
-    }
-  }, [updateMutation.isSuccess, createMutation.isSuccess, navigate]);
-
   if (isEditMode && isLoading) {
     return <div>Loading...</div>;
   }
@@ -98,12 +96,40 @@ export default function EditCountryPage() {
         enableReinitialize
         onSubmit={(values) => {
           if (isEditMode) {
-            updateMutation.mutate({
-              id: id as string,
-              data: values,
-            });
+            updateMutation.mutate(
+              { id: id as string, data: values },
+              {
+                onSuccess: () => {
+                  snackbar.showSnackbar(
+                    SUCCESS_MESSAGES.COUNTRY_UPDATED,
+                    "success"
+                  );
+                  setTimeout(() => navigate("/"), 1200);
+                },
+                onError: () => {
+                  snackbar.showSnackbar(
+                    ERROR_MESSAGES.COUNTRY_UPDATE_FAILED,
+                    "error"
+                  );
+                },
+              }
+            );
           } else {
-            createMutation.mutate(values);
+            createMutation.mutate(values, {
+              onSuccess: () => {
+                snackbar.showSnackbar(
+                  SUCCESS_MESSAGES.COUNTRY_CREATED,
+                  "success"
+                );
+                setTimeout(() => navigate("/"), 1200);
+              },
+              onError: () => {
+                snackbar.showSnackbar(
+                  ERROR_MESSAGES.COUNTRY_CREATE_FAILED,
+                  "error"
+                );
+              },
+            });
           }
         }}
       >
@@ -175,46 +201,35 @@ export default function EditCountryPage() {
         )}
       </Formik>
 
-      {/* Exit without saving */}
+      {/* Exit without saving dialog */}
       <Dialog
         open={showConfirmExit}
         onClose={() => setShowConfirmExit(false)}
       >
-        <DialogTitle>Exit without saving</DialogTitle>
+        <DialogTitle>
+          {EXIT_WITHOUT_SAVING_DIALOG.TITLE}
+        </DialogTitle>
         <DialogContent>
-          Are you sure you want to leave without saving your changes?
+          {EXIT_WITHOUT_SAVING_DIALOG.CONTENT}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setShowConfirmExit(false)}>
-            Stay
+            {EXIT_WITHOUT_SAVING_DIALOG.STAY}
           </Button>
           <Button color="error" onClick={() => navigate(-1)}>
-            Exit
+            {EXIT_WITHOUT_SAVING_DIALOG.EXIT}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Success snackbar */}
+      {/* Global snackbar */}
       <Snackbar
-        open={successOpen}
-        autoHideDuration={2000}
-        onClose={() => setSuccessOpen(false)}
-      >
-        <Alert severity="success" variant="filled">
-          {isEditMode
-            ? "Country updated successfully"
-            : "Country created successfully"}
-        </Alert>
-      </Snackbar>
-
-      {/* Error snackbar */}
-      <Snackbar
-        open={errorOpen}
+        open={snackbar.open}
         autoHideDuration={3000}
-        onClose={() => setErrorOpen(false)}
+        onClose={snackbar.closeSnackbar}
       >
-        <Alert severity="error" variant="filled">
-          {errorMessage}
+        <Alert severity={snackbar.severity} variant="filled">
+          {snackbar.message}
         </Alert>
       </Snackbar>
     </div>

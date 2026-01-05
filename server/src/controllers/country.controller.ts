@@ -4,9 +4,14 @@ import {
   getAllCountries,
   getCountryById,
   updateCountryById,
-  deleteCountryById
+  deleteCountryById,
 } from "../services/country.service";
 import { catchAsync } from "../utils/catchAsync";
+
+import {
+  SERVER_SUCCESS_MESSAGES,
+  SERVER_ERROR_MESSAGES,
+} from "../constants/messages";
 
 /**
  * Create country
@@ -15,16 +20,21 @@ export const createCountryController = catchAsync(
   async (req: Request, res: Response) => {
     try {
       const country = await createCountry(req.body);
+
       res.status(201).json(country);
     } catch (error: any) {
       // Mongo duplicate key (unique index)
       if (error.code === 11000) {
-        const err = new Error("Country with this name already exists");
+        const err = new Error(
+          SERVER_ERROR_MESSAGES.COUNTRY_ALREADY_EXISTS
+        );
         (err as any).statusCode = 409;
         throw err;
       }
 
-      const err = new Error("Failed to create country");
+      const err = new Error(
+        SERVER_ERROR_MESSAGES.COUNTRY_CREATE_FAILED
+      );
       (err as any).statusCode = 400;
       throw err;
     }
@@ -51,7 +61,9 @@ export const getCountryByIdController = catchAsync(
     const country = await getCountryById(id);
 
     if (!country) {
-      const err = new Error("Country not found");
+      const err = new Error(
+        SERVER_ERROR_MESSAGES.COUNTRY_NOT_FOUND
+      );
       (err as any).statusCode = 404;
       throw err;
     }
@@ -71,7 +83,9 @@ export const updateCountryController = catchAsync(
     const updatedCountry = await updateCountryById(id, updateData);
 
     if (!updatedCountry) {
-      const err = new Error("Country not found");
+      const err = new Error(
+        SERVER_ERROR_MESSAGES.COUNTRY_NOT_FOUND
+      );
       (err as any).statusCode = 404;
       throw err;
     }
@@ -90,13 +104,15 @@ export const deleteCountryController = catchAsync(
     const deletedCountry = await deleteCountryById(id);
 
     if (!deletedCountry) {
-      const err = new Error("Country not found");
+      const err = new Error(
+        SERVER_ERROR_MESSAGES.COUNTRY_NOT_FOUND
+      );
       (err as any).statusCode = 404;
       throw err;
     }
 
     res.status(200).json({
-      message: "Country deleted successfully"
+      message: SERVER_SUCCESS_MESSAGES.COUNTRY_DELETED,
     });
   }
 );

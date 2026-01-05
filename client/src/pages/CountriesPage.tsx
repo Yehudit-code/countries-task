@@ -15,7 +15,10 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from "react-router-dom";
 
-import type { Country } from "../types/country";
+import {
+  SUCCESS_MESSAGES,
+  ERROR_MESSAGES,
+} from "../constants/messages";
 
 export default function CountriesPage() {
   const navigate = useNavigate();
@@ -31,7 +34,6 @@ export default function CountriesPage() {
   } = useCountriesQuery();
 
   const safeCountries = Array.isArray(countries) ? countries : [];
-
   const deleteMutation = useDeleteCountry();
 
   if (isLoading) {
@@ -39,9 +41,12 @@ export default function CountriesPage() {
   }
 
   if (isError) {
-    return <Alert severity="error">Failed to load countries</Alert>;
+    return (
+      <Alert severity="error">
+        {ERROR_MESSAGES.COUNTRIES_FETCH_FAILED}
+      </Alert>
+    );
   }
-
 
   return (
     <>
@@ -88,7 +93,6 @@ export default function CountriesPage() {
           >
             Delete
           </Button>
-
         </DialogActions>
       </Dialog>
 
@@ -99,7 +103,7 @@ export default function CountriesPage() {
         onClose={() => setDeleteSuccessOpen(false)}
       >
         <Alert severity="success" variant="filled">
-          Country deleted successfully
+          {SUCCESS_MESSAGES.COUNTRY_DELETED}
         </Alert>
       </Snackbar>
 
@@ -110,7 +114,7 @@ export default function CountriesPage() {
         onClose={() => setDeleteErrorOpen(false)}
       >
         <Alert severity="error" variant="filled">
-          Failed to delete country
+          {ERROR_MESSAGES.COUNTRY_DELETE_FAILED}
         </Alert>
       </Snackbar>
     </>
