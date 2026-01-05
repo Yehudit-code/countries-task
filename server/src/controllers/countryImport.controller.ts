@@ -1,17 +1,13 @@
 import { Request, Response } from "express";
 import { importCountriesIfEmpty } from "../services/countryImport.service";
+import { catchAsync } from "../utils/catchAsync";
 
-export const importCountriesController = async (
-  _req: Request,
-  res: Response
-) => {
-  try {
+/**
+ * Import countries from external API (only if DB is empty)
+ */
+export const importCountriesController = catchAsync(
+  async (_req: Request, res: Response) => {
     const result = await importCountriesIfEmpty();
     res.status(200).json(result);
-  } catch (error) {
-    console.error("Import countries failed", error);
-    res.status(500).json({
-      message: "Failed to import countries"
-    });
   }
-};
+);

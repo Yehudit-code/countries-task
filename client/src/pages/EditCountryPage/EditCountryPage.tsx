@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Formik, Form, Field } from "formik";
 import {
   Button,
@@ -15,16 +15,15 @@ import {
 } from "@mui/material";
 
 import type { Country } from "../../types/country";
-import {
-  getCountryById,
-  updateCountry,
-  createCountry,
-} from "../../api/countries.api";
+import { getCountryById } from "../../api/countries.api";
 import { countrySchema } from "../../validation/country.schema";
 import styles from "./EditCountryPage.module.css";
 
 import { useSetRecoilState } from "recoil";
 import { selectedCountryNameState } from "../../store/selectedCountryState";
+
+import { useUpdateCountry } from "../../hooks/useUpdateCountry";
+import { useCreateCountry } from "../../hooks/useCreateCountry";
 
 export default function EditCountryPage() {
   const { id } = useParams<{ id?: string }>();
@@ -41,6 +40,9 @@ export default function EditCountryPage() {
   const [successOpen, setSuccessOpen] = useState(false);
   const [errorOpen, setErrorOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const updateMutation = useUpdateCountry();
+  const createMutation = useCreateCountry();
 
   /* ---------- Fetch country (cache-first) ---------- */
   const { data, isLoading } = useQuery<Country>({
@@ -68,30 +70,16 @@ export default function EditCountryPage() {
     };
   }, [isEditMode, data, setSelectedCountryName]);
 
-  /* ---------- Create / Update mutation ---------- */
-  const mutation = useMutation({
-    mutationFn: (values: Partial<Country>) =>
-      isEditMode
-        ? updateCountry(id as string, values)
-        : createCountry(values),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["countries"] });
+  /* ---------- Handle success ---------- */
+  useEffect(() => {
+    if (updateMutation.isSuccess || createMutation.isSuccess) {
       setSuccessOpen(true);
 
       setTimeout(() => {
         navigate("/");
       }, 1200);
-    },
-    onError: (error: any) => {
-      const message =
-        error?.response?.status === 409
-          ? "A country with this name already exists"
-          : "Operation failed. Please try again.";
-
-      setErrorMessage(message);
-      setErrorOpen(true);
-    },
-  });
+    }
+  }, [updateMutation.isSuccess, createMutation.isSuccess, navigate]);
 
   if (isEditMode && isLoading) {
     return <div>Loading...</div>;
@@ -108,7 +96,16 @@ export default function EditCountryPage() {
         }}
         validationSchema={countrySchema}
         enableReinitialize
-        onSubmit={(values) => mutation.mutate(values)}
+        onSubmit={(values) => {
+          if (isEditMode) {
+            updateMutation.mutate({
+              id: id as string,
+              data: values,
+            });
+          } else {
+            createMutation.mutate(values);
+          }
+        }}
       >
         {({ errors, touched, dirty, isValid }) => (
           <Form>
@@ -150,7 +147,12 @@ export default function EditCountryPage() {
                 <Button
                   type="submit"
                   variant="contained"
-                  disabled={!dirty || !isValid || mutation.isPending}
+                  disabled={
+                    !dirty ||
+                    !isValid ||
+                    updateMutation.isPending ||
+                    createMutation.isPending
+                  }
                 >
                   {isEditMode ? "Save" : "Create"}
                 </Button>

@@ -39,13 +39,18 @@ export async function createCountry(
 /**
  * Update country by id
  */
-export async function updateCountry(
-  id: string,
-  data: Partial<Country>
-): Promise<Country> {
-  const res = await axios.put<Country>(`${BASE_URL}/countries/${id}`, data);
+// src/api/countries.api.ts
+export const updateCountry = async ({
+  id,
+  data,
+}: {
+  id: string;
+  data: Partial<Country>;
+}): Promise<Country> => {
+  const res = await axios.put(`/countries/${id}`, data);
   return res.data;
-}
+};
+
 
 /**
  * Delete country by id
