@@ -222,11 +222,12 @@ export default function EditCountryPage() {
         </DialogActions>
       </Dialog>
 
-      {/* Global snackbar */}
+      {/* Snackbar – top right */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
         onClose={snackbar.closeSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
         <Alert severity={snackbar.severity} variant="filled">
           {snackbar.message}
