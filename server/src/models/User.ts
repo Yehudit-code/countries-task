@@ -7,7 +7,7 @@ export interface UserDocument extends Document {
   username: string;
   email: string;
   phone: string;
-  profileImage?: string;
+  profileImage?: string; // path to file (not the image itself)
   password: string;
   role: "admin" | "user";
   permissions: {
@@ -15,6 +15,11 @@ export interface UserDocument extends Document {
     update: boolean;
     delete: boolean;
   };
+
+  // password reset (future requirement)
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
+
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -22,42 +27,64 @@ const UserSchema = new Schema<UserDocument>(
   {
     firstName: {
       type: String,
-      required: true
+      required: true,
+      trim: true
     },
+
     lastName: {
       type: String,
-      required: true
+      required: true,
+      trim: true
     },
+
     username: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
+      trim: true
     },
+
     email: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
+      lowercase: true,
+      trim: true
     },
+
     phone: {
       type: String,
       required: true
     },
+
     profileImage: {
-      type: String
+      type: String // stores file path only
     },
+
     password: {
       type: String,
-      required: true
+      required: true,
+      select: false // important: do not return password by default
     },
+
     role: {
       type: String,
       enum: ["admin", "user"],
       default: "user"
     },
+
     permissions: {
       create: { type: Boolean, default: false },
       update: { type: Boolean, default: false },
       delete: { type: Boolean, default: false }
+    },
+
+    resetPasswordToken: {
+      type: String
+    },
+
+    resetPasswordExpires: {
+      type: Date
     }
   },
   {
@@ -65,23 +92,13 @@ const UserSchema = new Schema<UserDocument>(
   }
 );
 
-/**
- * Hash password before saving user
- */
 UserSchema.pre<UserDocument>("save", async function () {
-  if (!this.isModified("password")) {
-    return;
-  }
+  if (!this.isModified("password")) return;
 
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-
-
-/**
- * Compare password on login
- */
 UserSchema.methods.comparePassword = async function (
   candidatePassword: string
 ) {

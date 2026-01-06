@@ -10,23 +10,29 @@ export const signup = async (req: Request, res: Response) => {
       username,
       email,
       phone,
-      password
+      password,
+      profileImage
     } = req.body;
 
-    // basic validation
-    if (!firstName || !lastName || !username || !email || !phone || !password) {
+    if (
+      !firstName ||
+      !lastName ||
+      !username ||
+      !email ||
+      !phone ||
+      !password
+    ) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // check duplicates
     const existingUser = await User.findOne({
       $or: [{ email }, { username }]
     });
 
     if (existingUser) {
-      return res
-        .status(409)
-        .json({ message: "User with email or username already exists" });
+      return res.status(409).json({
+        message: "User with this email or username already exists"
+      });
     }
 
     const user = await User.create({
@@ -35,7 +41,9 @@ export const signup = async (req: Request, res: Response) => {
       username,
       email,
       phone,
-      password
+      profileImage,
+      password,
+      role: "user"
     });
 
     const token = generateToken(user);
@@ -45,14 +53,19 @@ export const signup = async (req: Request, res: Response) => {
       token,
       user: {
         id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
         username: user.username,
-        role: user.role
+        email: user.email,
+        role: user.role,
+        permissions: user.permissions
       }
     });
   } catch (error) {
     res.status(500).json({ message: "Signup failed" });
   }
 };
+
 
 export const login = async (req: Request, res: Response) => {
   try {
@@ -62,7 +75,7 @@ export const login = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Missing credentials" });
     }
 
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ username }).select("+password");
 
     if (!user) {
       return res.status(401).json({ message: "Invalid username or password" });
@@ -87,6 +100,26 @@ export const login = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
+    console.error("LOGIN ERROR:", error);
     res.status(500).json({ message: "Login failed" });
   }
+};
+
+export const getMe = async (req: Request, res: Response) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  const user = await User.findById(req.user.userId);
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  res.json({
+    id: user._id,
+    username: user.username,
+    role: user.role,
+    permissions: user.permissions
+  });
 };

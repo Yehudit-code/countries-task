@@ -1,20 +1,18 @@
-import axios from "axios";
+import api from "./axios";
 import type { Country } from "../types/country";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
 /**
- * Import countries if the database is empty
+ * Import countries if the database is empty (admin only)
  */
 export async function importCountriesIfEmpty(): Promise<void> {
-  await axios.post(`${BASE_URL}/countries/import`);
+  await api.post("/countries/import");
 }
 
 /**
  * Fetch all countries
  */
 export async function fetchCountries(): Promise<Country[]> {
-  const res = await axios.get<Country[]>(`${BASE_URL}/countries`);
+  const res = await api.get<Country[]>("/api/countries");
   return res.data;
 }
 
@@ -22,7 +20,7 @@ export async function fetchCountries(): Promise<Country[]> {
  * Get country by id
  */
 export async function getCountryById(id: string): Promise<Country> {
-  const res = await axios.get<Country>(`${BASE_URL}/countries/${id}`);
+  const res = await api.get<Country>(`/countries/${id}`);
   return res.data;
 }
 
@@ -32,29 +30,27 @@ export async function getCountryById(id: string): Promise<Country> {
 export async function createCountry(
   data: Partial<Country>
 ): Promise<Country> {
-  const res = await axios.post<Country>(`${BASE_URL}/countries`, data);
+  const res = await api.post<Country>("/countries", data);
   return res.data;
 }
 
 /**
  * Update country by id
  */
-// src/api/countries.api.ts
-export const updateCountry = async ({
+export async function updateCountry({
   id,
   data,
 }: {
   id: string;
   data: Partial<Country>;
-}): Promise<Country> => {
-  const res = await axios.put(`/countries/${id}`, data);
+}): Promise<Country> {
+  const res = await api.put<Country>(`/countries/${id}`, data);
   return res.data;
-};
-
+}
 
 /**
  * Delete country by id
  */
 export async function deleteCountry(id: string): Promise<void> {
-  await axios.delete(`${BASE_URL}/countries/${id}`);
+  await api.delete(`/countries/${id}`);
 }
