@@ -37,13 +37,10 @@ api.interceptors.response.use(
     const status = error.response?.status;
 
     if (status === 401) {
-      // Token invalid or expired
       localStorage.removeItem("token");
-      window.location.href = "/login";
     }
 
     if (status === 403) {
-      // No permission – UI will usually show a snackbar
       console.warn("Forbidden: insufficient permissions");
     }
 

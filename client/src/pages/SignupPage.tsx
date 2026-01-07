@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import {
@@ -7,10 +8,13 @@ import {
   CardContent,
   TextField,
   Typography,
-  Stack
+  Stack,
+  Avatar
 } from "@mui/material";
 import { signup } from "../api/auth.api";
 import { useNavigate } from "react-router-dom";
+import { useSetRecoilState } from "recoil";
+import { authUserState } from "../store/auth.store";
 
 const SignupSchema = Yup.object({
   firstName: Yup.string().required("First name is required"),
@@ -25,6 +29,10 @@ const SignupSchema = Yup.object({
 
 export default function SignupPage() {
   const navigate = useNavigate();
+  const setUser = useSetRecoilState(authUserState);
+
+  const [image, setImage] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
 
   return (
     <Box
@@ -54,8 +62,22 @@ export default function SignupPage() {
             validationSchema={SignupSchema}
             onSubmit={async (values, { setSubmitting }) => {
               try {
-                await signup(values);
-                navigate("/login");
+                const formData = new FormData();
+
+                Object.entries(values).forEach(([key, value]) => {
+                  formData.append(key, value);
+                });
+
+                if (image) {
+                  formData.append("image", image);
+                }
+
+                const data = await signup(formData);
+
+                localStorage.setItem("token", data.token);
+                setUser(data.user);
+
+                navigate("/");
               } catch (error: any) {
                 alert(error.response?.data?.message || "Signup failed");
               } finally {
@@ -66,6 +88,29 @@ export default function SignupPage() {
             {({ errors, touched, handleChange }) => (
               <Form>
                 <Stack spacing={2}>
+                  {/* Profile image preview */}
+                  <Stack alignItems="center" spacing={1}>
+                    <Avatar
+                      src={preview || undefined}
+                      sx={{ width: 80, height: 80 }}
+                    />
+                    <Button variant="outlined" component="label">
+                      Upload Profile Image
+                      <input
+                        type="file"
+                        hidden
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+
+                          setImage(file);
+                          setPreview(URL.createObjectURL(file));
+                        }}
+                      />
+                    </Button>
+                  </Stack>
+
                   <TextField
                     name="firstName"
                     label="First Name"

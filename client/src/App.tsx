@@ -5,11 +5,30 @@ import EditCountryPage from "./pages/EditCountryPage/EditCountryPage";
 import Navbar from './components/Navbar/Navbar';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
+import { useEffect } from "react";
+import { useSetRecoilState } from "recoil";
+import { authUserState } from "./store/auth.store";
+import { getMe } from "./api/auth.api";
 
 
 
 function App() {
+  const setUser = useSetRecoilState(authUserState);
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    getMe()
+      .then((user) => {
+        setUser(user);
+      })
+      .catch(() => {
+        localStorage.removeItem("token");
+        setUser(null);
+      });
+  }, []);
+  
   return (
     <BrowserRouter>
     <Navbar />

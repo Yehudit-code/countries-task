@@ -10,8 +10,7 @@ export const signup = async (req: Request, res: Response) => {
       username,
       email,
       phone,
-      password,
-      profileImage
+      password
     } = req.body;
 
     if (
@@ -30,10 +29,14 @@ export const signup = async (req: Request, res: Response) => {
     });
 
     if (existingUser) {
-      return res.status(409).json({
-        message: "User with this email or username already exists"
-      });
+      return res
+        .status(409)
+        .json({ message: "User already exists" });
     }
+
+    const profileImage = req.file
+      ? `/uploads/${req.file.filename}`
+      : undefined;
 
     const user = await User.create({
       firstName,
@@ -41,24 +44,20 @@ export const signup = async (req: Request, res: Response) => {
       username,
       email,
       phone,
-      profileImage,
       password,
-      role: "user"
+      profileImage
     });
 
     const token = generateToken(user);
 
     res.status(201).json({
-      message: "User created successfully",
       token,
       user: {
         id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
         username: user.username,
-        email: user.email,
         role: user.role,
-        permissions: user.permissions
+        permissions: user.permissions,
+        profileImage: user.profileImage
       }
     });
   } catch (error) {

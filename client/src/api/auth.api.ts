@@ -11,12 +11,24 @@ export interface SignupPayload {
     password: string;
 }
 
-export const login = async (data: LoginPayload) => {
-    const res = await api.post("/api/auth/login", data);
+export const login = async (data: {
+    username: string;
+    password: string;
+}) => {
+    const res = await api.post("/auth/login", data);
     return res.data;
 };
 
-export const signup = async (data: SignupPayload) => {
-    const res = await api.post("/api/auth/signup", data);
+export const signup = async (data: FormData) => {
+    const res = await api.post("/auth/signup", data, {
+        headers: {
+            "Content-Type": "multipart/form-data"
+        }
+    });
+    return res.data;
+};
+
+export const getMe = async () => {
+    const res = await api.get("/auth/me");
     return res.data;
 };

@@ -12,7 +12,7 @@ export async function importCountriesIfEmpty(): Promise<void> {
  * Fetch all countries
  */
 export async function fetchCountries(): Promise<Country[]> {
-  const res = await api.get<Country[]>("/api/countries");
+  const res = await api.get<Country[]>("/countries");
   return res.data;
 }
 
