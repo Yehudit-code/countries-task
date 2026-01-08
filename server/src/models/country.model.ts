@@ -1,10 +1,11 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, Types } from "mongoose";
 
 export interface CountryDocument extends Document {
   name: string;
   flag: string;
   population: number;
   region: string;
+  cities: Types.ObjectId[];
 }
 
 const CountrySchema = new Schema<CountryDocument>(
@@ -25,7 +26,13 @@ const CountrySchema = new Schema<CountryDocument>(
     region: {
       type: String,
       required: true
-    }
+    },
+    cities: [
+      {
+        type: Types.ObjectId,
+        ref: "City",
+      },
+    ],
   },
   {
     timestamps: true

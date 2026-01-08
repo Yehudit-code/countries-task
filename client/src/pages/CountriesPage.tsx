@@ -8,18 +8,22 @@ import {
   Dialog,
   DialogTitle,
   DialogActions,
+  DialogContent,
   Button,
   Stack,
   Snackbar,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from "react-router-dom";
+import { CountryCities } from "../components/cities/CountryCities";
 
 export default function CountriesPage() {
   const navigate = useNavigate();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [deleteSuccessOpen, setDeleteSuccessOpen] = useState(false);
   const [deleteErrorOpen, setDeleteErrorOpen] = useState(false);
+  const [openCitiesCountryId, setOpenCitiesCountryId] = useState<string | null>(null);
+
 
   /* ---------- Fetch countries (via cache hook) ---------- */
   const {
@@ -58,7 +62,25 @@ export default function CountriesPage() {
       <CountriesDataGrid
         countries={safeCountries}
         onDelete={(id) => setSelectedId(id)}
+        onShowCities={(countryId) => setOpenCitiesCountryId(countryId)}
       />
+      <Dialog
+        open={Boolean(openCitiesCountryId)}
+        onClose={() => setOpenCitiesCountryId(null)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Cities</DialogTitle>
+
+        <DialogContent>
+          {openCitiesCountryId && (
+            <CountryCities countryId={openCitiesCountryId} />
+
+          )}
+        </DialogContent>
+      </Dialog>
+
+
 
       {/* Delete confirmation dialog */}
       <Dialog open={!!selectedId} onClose={() => setSelectedId(null)}>

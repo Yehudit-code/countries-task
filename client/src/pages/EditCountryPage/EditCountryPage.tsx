@@ -17,6 +17,7 @@ import {
 import type { Country } from "../../types/country";
 import { getCountryById } from "../../api/countries.api";
 import { countrySchema } from "../../validation/country.schema";
+import { CountryCities } from "../../components/cities/CountryCities";
 import styles from "./EditCountryPage.module.css";
 
 import { useSetRecoilState } from "recoil";
@@ -47,6 +48,7 @@ export default function EditCountryPage() {
   );
 
   const [showConfirmExit, setShowConfirmExit] = useState(false);
+  const [citiesChanged, setCitiesChanged] = useState(false);
 
   const updateMutation = useUpdateCountry();
   const createMutation = useCreateCountry();
@@ -168,17 +170,26 @@ export default function EditCountryPage() {
                 error={touched.flag && !!errors.flag}
                 helperText={touched.flag && errors.flag}
               />
+              {isEditMode && id && (
+                <CountryCities
+                  countryId={id as string}
+                  allowEdit
+                />
+
+              )}
+
 
               <div className={styles.actions}>
                 <Button
                   type="submit"
                   variant="contained"
                   disabled={
-                    !dirty ||
+                    (!dirty && !citiesChanged) ||
                     !isValid ||
                     updateMutation.isPending ||
                     createMutation.isPending
                   }
+
                 >
                   {isEditMode ? "Save" : "Create"}
                 </Button>
@@ -186,11 +197,12 @@ export default function EditCountryPage() {
                 <Button
                   variant="outlined"
                   onClick={() => {
-                    if (dirty) {
+                    if (dirty || citiesChanged) {
                       setShowConfirmExit(true);
                     } else {
                       navigate(-1);
                     }
+
                   }}
                 >
                   Cancel
@@ -200,6 +212,7 @@ export default function EditCountryPage() {
           </Form>
         )}
       </Formik>
+
 
       {/* Exit without saving dialog */}
       <Dialog

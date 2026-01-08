@@ -1,0 +1,15 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const countryImport_controller_1 = require("../controllers/countryImport.controller");
+const country_controller_1 = require("../controllers/country.controller");
+const auth_middleware_1 = require("../middlewares/auth.middleware");
+const permission_middleware_1 = require("../middlewares/permission.middleware");
+const router = (0, express_1.Router)();
+router.post("/import", auth_middleware_1.authenticate, (0, permission_middleware_1.requirePermission)("create"), countryImport_controller_1.importCountriesController);
+router.post("/", auth_middleware_1.authenticate, (0, permission_middleware_1.requirePermission)("create"), country_controller_1.createCountryController);
+router.get("/", auth_middleware_1.authenticate, country_controller_1.getCountriesController);
+router.get("/:id", auth_middleware_1.authenticate, country_controller_1.getCountryByIdController);
+router.put("/:id", auth_middleware_1.authenticate, (0, permission_middleware_1.requirePermission)("update"), country_controller_1.updateCountryController);
+router.delete("/:id", auth_middleware_1.authenticate, (0, permission_middleware_1.requirePermission)("delete"), country_controller_1.deleteCountryController);
+exports.default = router;
