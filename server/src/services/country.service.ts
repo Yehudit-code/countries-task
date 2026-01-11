@@ -1,3 +1,4 @@
+import { City } from "../models/city.model";
 import { Country, CountryDocument } from "../models/country.model";
 
 export const createCountry = async (
@@ -43,6 +44,9 @@ export const updateCountryById = async (
 };
 
 export const deleteCountryById = async (id: string) => {
+  
+  await City.deleteMany({ country: id });
+  
   const deletedCountry = await Country.findByIdAndDelete(id);
   return deletedCountry;
 };

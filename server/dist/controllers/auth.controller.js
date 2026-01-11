@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getMe = exports.login = exports.signup = void 0;
-const User_1 = require("../models/User");
+const User_1 = require("../models/");
 const jwt_1 = require("../utils/jwt");
 const signup = async (req, res) => {
     try {

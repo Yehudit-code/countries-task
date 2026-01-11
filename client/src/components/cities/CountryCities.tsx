@@ -14,7 +14,6 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import EditIcon from "@mui/icons-material/Edit";
 import CheckIcon from "@mui/icons-material/Check";
-
 import {
     getCitiesByCountry,
     createCity,
@@ -37,7 +36,7 @@ export const CountryCities = ({
     const [newCity, setNewCity] = useState("");
     const [editCityId, setEditCityId] = useState<string | null>(null);
     const [editName, setEditName] = useState("");
-    const [citiesCountryId, setCitiesCountryId] = useState<string | null>(null);
+    // const [citiesCountryId, setCitiesCountryId] = useState<string | null>(null);
 
 
     const { data: cities = [], isLoading } = useQuery({
@@ -59,7 +58,6 @@ export const CountryCities = ({
             name,
         }: {
             cityId: string;
-
             name: string;
         }) => updateCity(cityId, name),
         onSuccess: () => {
@@ -107,7 +105,39 @@ export const CountryCities = ({
                                 },
                             }}
                         >
-                            <Typography>{city.name}</Typography>
+                            {editCityId === city._id ? (
+                                <Stack direction="row" spacing={1} alignItems="center">
+                                    <TextField
+                                        size="small"
+                                        value={editName}
+                                        onChange={(e) => setEditName(e.target.value)}
+                                    />
+
+                                    <IconButton
+                                        color="success"
+                                        onClick={() =>
+                                            updateMutation.mutate({
+                                                cityId: city._id,
+                                                name: editName,
+                                            })
+                                        }
+                                        disabled={!editName}
+                                    >
+                                        <CheckIcon fontSize="small" />
+                                    </IconButton>
+
+                                    <IconButton
+                                        onClick={() => {
+                                            setEditCityId(null);
+                                            setEditName("");
+                                        }}
+                                    >
+                                        ✕
+                                    </IconButton>
+                                </Stack>
+                            ) : (
+                                <Typography>{city.name}</Typography>
+                            )}
 
                             {allowEdit && (
                                 <Stack direction="row" spacing={0.5}>

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { User } from "../models/User";
+import { User } from "../models/user.model";
 import { generateToken } from "../utils/jwt";
 
 export const signup = async (req: Request, res: Response) => {
@@ -29,9 +29,7 @@ export const signup = async (req: Request, res: Response) => {
     });
 
     if (existingUser) {
-      return res
-        .status(409)
-        .json({ message: "User already exists" });
+      return res.status(409).json({ message: "User already exists" });
     }
 
     const profileImage = req.file
@@ -45,7 +43,13 @@ export const signup = async (req: Request, res: Response) => {
       email,
       phone,
       password,
-      profileImage
+      profileImage,
+      role: "user",
+      permissions: {
+        create: false,
+        update: false,
+        delete: false
+      }
     });
 
     const token = generateToken(user);
