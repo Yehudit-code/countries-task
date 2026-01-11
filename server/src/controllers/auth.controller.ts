@@ -99,7 +99,8 @@ export const login = async (req: Request, res: Response) => {
         id: user._id,
         username: user.username,
         role: user.role,
-        permissions: user.permissions
+        permissions: user.permissions,
+        profileImage: user.profileImage
       }
     });
   } catch (error) {

@@ -26,19 +26,21 @@ function App() {
       .catch(() => {
         localStorage.removeItem("token");
         setUser(null);
+        console.warn("Session expired");
       });
-  }, []);
-  
+
+  }, [setUser]);
+
   return (
     <BrowserRouter>
-    <Navbar />
+      <Navbar />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/" element={<CountriesPage />} />
         <Route path="/countries/new" element={<EditCountryPage />} />
         <Route path="/countries/:id" element={<EditCountryPage />} />
-        
+
       </Routes>
     </BrowserRouter>
   );

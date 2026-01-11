@@ -1,69 +1,59 @@
 import { useState } from "react";
-import { useCountriesQuery } from "../hooks/useCountriesQuery";
-import { useDeleteCountry } from "../hooks/useDeleteCountry";
-import CountriesDataGrid from "../components/CountriesDataGrid";
+import { useNavigate } from "react-router-dom";
+import { useRecoilValue } from "recoil";
 import {
   CircularProgress,
   Alert,
   Dialog,
   DialogTitle,
-  DialogActions,
   DialogContent,
-  Button,
-  Stack,
   Snackbar,
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import { useNavigate } from "react-router-dom";
+
+import { useCountriesQuery } from "../hooks/useCountriesQuery";
+import { useDeleteCountry } from "../hooks/useDeleteCountry";
+import { authUserState } from "../store/auth.store";
+
+import CountriesDataGrid from "../components/CountriesDataGrid";
 import { CountryCities } from "../components/cities/CountryCities";
+import CountriesActions from "../components/countries/CountriesActions";
+import DeleteCountryDialog from "../components/countries/DeleteCountryDialog";
 
 export default function CountriesPage() {
   const navigate = useNavigate();
+  const user = useRecoilValue(authUserState);
+
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [deleteSuccessOpen, setDeleteSuccessOpen] = useState(false);
-  const [deleteErrorOpen, setDeleteErrorOpen] = useState(false);
   const [openCitiesCountryId, setOpenCitiesCountryId] = useState<string | null>(null);
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [errorOpen, setErrorOpen] = useState(false);
 
-
-  /* ---------- Fetch countries (via cache hook) ---------- */
-  const {
-    data: countries,
-    isLoading,
-    isError,
-  } = useCountriesQuery();
-
-  const safeCountries = Array.isArray(countries) ? countries : [];
-
+  const { data, isLoading, isError } = useCountriesQuery();
   const deleteMutation = useDeleteCountry();
 
-  if (isLoading) {
-    return <CircularProgress />;
-  }
+  const countries = Array.isArray(data) ? data : [];
 
-  if (isError) {
-    return <Alert severity="error">Failed to load countries</Alert>;
-  }
+  if (isLoading) return <CircularProgress />;
+  if (isError) return <Alert severity="error">Failed to load countries</Alert>;
 
   return (
     <>
       {/* Action buttons */}
-      <Stack direction="row" spacing={2} mb={2} padding={2}>
-        <Button
-          variant="contained"
-          color="success"
-          startIcon={<AddIcon />}
-          onClick={() => navigate("/countries/new")}
-        >
-          Add Country
-        </Button>
-      </Stack>
+      <CountriesActions
+        canCreate={!!user?.permissions.create}
+        onAdd={() => navigate("/countries/new")}
+      />
 
       {/* Countries table */}
       <CountriesDataGrid
-        countries={safeCountries}
+        countries={countries}
+        canDelete={!!user?.permissions.delete}
+        canUpdate={!!user?.permissions.update}
         onDelete={(id) => setSelectedId(id)}
-        onShowCities={(countryId) => setOpenCitiesCountryId(countryId)}
+        onShowCities={(id) => setOpenCitiesCountryId(id)}
       />
+
+      {/* Cities dialog */}
       <Dialog
         open={Boolean(openCitiesCountryId)}
         onClose={() => setOpenCitiesCountryId(null)}
@@ -71,50 +61,34 @@ export default function CountriesPage() {
         fullWidth
       >
         <DialogTitle>Cities</DialogTitle>
-
         <DialogContent>
           {openCitiesCountryId && (
             <CountryCities countryId={openCitiesCountryId} />
-
           )}
         </DialogContent>
       </Dialog>
 
+      {/* Delete dialog */}
+      <DeleteCountryDialog
+        open={!!selectedId}
+        onCancel={() => setSelectedId(null)}
+        onConfirm={() => {
+          if (!selectedId) return;
+          deleteMutation.mutate(selectedId, {
+            onSuccess: () => {
+              setSuccessOpen(true);
+              setSelectedId(null);
+            },
+            onError: () => setErrorOpen(true),
+          });
+        }}
+      />
 
-
-      {/* Delete confirmation dialog */}
-      <Dialog open={!!selectedId} onClose={() => setSelectedId(null)}>
-        <DialogTitle>
-          Are you sure you want to delete this country?
-        </DialogTitle>
-        <DialogActions>
-          <Button onClick={() => setSelectedId(null)}>Cancel</Button>
-          <Button
-            color="error"
-            onClick={() => {
-              if (!selectedId) return;
-
-              deleteMutation.mutate(selectedId, {
-                onSuccess: () => {
-                  setDeleteSuccessOpen(true);
-                  setSelectedId(null);
-                },
-                onError: () => {
-                  setDeleteErrorOpen(true);
-                },
-              });
-            }}
-          >
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Success snackbar */}
+      {/* Snackbars */}
       <Snackbar
-        open={deleteSuccessOpen}
+        open={successOpen}
         autoHideDuration={2000}
-        onClose={() => setDeleteSuccessOpen(false)}
+        onClose={() => setSuccessOpen(false)}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
         <Alert severity="success" variant="filled">
@@ -122,11 +96,10 @@ export default function CountriesPage() {
         </Alert>
       </Snackbar>
 
-      {/* Error snackbar */}
       <Snackbar
-        open={deleteErrorOpen}
+        open={errorOpen}
         autoHideDuration={3000}
-        onClose={() => setDeleteErrorOpen(false)}
+        onClose={() => setErrorOpen(false)}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
         <Alert severity="error" variant="filled">

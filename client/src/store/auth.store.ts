@@ -1,14 +1,15 @@
 import { atom } from "recoil";
 
 export interface AuthUser {
-  name: string;
-  email: string;
+  id: string;
+  username: string;
   role: "admin" | "user";
   permissions: {
     create: boolean;
     update: boolean;
     delete: boolean;
   };
+  profileImage?: string;
 }
 
 export const authUserState = atom<AuthUser | null>({
