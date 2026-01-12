@@ -58,7 +58,8 @@ const UserSchema = new Schema<UserDocument>(
     },
 
     profileImage: {
-      type: String // stores file path only
+      type: String,
+      default: "heart.jpg"
     },
 
     password: {

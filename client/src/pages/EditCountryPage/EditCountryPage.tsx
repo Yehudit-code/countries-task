@@ -174,7 +174,9 @@ export default function EditCountryPage() {
                 <CountryCities
                   countryId={id as string}
                   allowEdit
+                  onCitiesChange={() => setCitiesChanged(true)}
                 />
+
 
               )}
 

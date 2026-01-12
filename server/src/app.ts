@@ -3,6 +3,7 @@ import cors from "cors";
 import path from "path";
 import countryRoutes from "./routes/country.routes";
 import authRoutes from "./routes/auth.routes";
+import userRoutes from "./routes/user.routes";
 import { errorHandler } from "./middlewares/error.middleware";
 import cityRoutes from "./routes/city.routes";
 
@@ -11,11 +12,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(
-    "/uploads",
-    express.static(path.join(__dirname, "..", "uploads"))
+  "/uploads",
+  express.static(path.join(__dirname, "..", "public", "uploads"))
 );
 
 app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/countries", countryRoutes);
 app.use("/api/cities", cityRoutes);
 

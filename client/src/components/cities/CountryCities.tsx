@@ -25,18 +25,19 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 interface Props {
     countryId: string;
     allowEdit?: boolean;
+    onCitiesChange?: () => void;
 }
 
 export const CountryCities = ({
     countryId,
-    allowEdit = false,
+    allowEdit,
+    onCitiesChange,
 }: Props) => {
     const queryClient = useQueryClient();
 
     const [newCity, setNewCity] = useState("");
     const [editCityId, setEditCityId] = useState<string | null>(null);
     const [editName, setEditName] = useState("");
-    // const [citiesCountryId, setCitiesCountryId] = useState<string | null>(null);
 
 
     const { data: cities = [], isLoading } = useQuery({
@@ -49,6 +50,8 @@ export const CountryCities = ({
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["cities", countryId] });
             setNewCity("");
+            onCitiesChange?.();
+
         },
     });
 
@@ -63,6 +66,8 @@ export const CountryCities = ({
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["cities", countryId] });
             setEditCityId(null);
+            onCitiesChange?.();
+
         },
     });
 
@@ -70,6 +75,7 @@ export const CountryCities = ({
         mutationFn: (cityId: string) => deleteCity(cityId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["cities", countryId] });
+            onCitiesChange?.();
         },
     });
 

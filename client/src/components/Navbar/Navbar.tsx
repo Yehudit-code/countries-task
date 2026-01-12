@@ -15,6 +15,8 @@ export default function Navbar() {
     setUser(null);
     navigate("/login");
   };
+console.log(user);
+console.log(user?.profileImage);
 
   return (
     <AppBar position="static">
@@ -37,7 +39,10 @@ export default function Navbar() {
         {user ? (
           <>
             <Typography sx={{ mr: 2 }}>
-              {user.name}
+              {user.username}
+            </Typography>
+            <Typography sx={{ mr: 2 }}>
+              <img src={user.profileImage} />
             </Typography>
             <Button color="inherit" onClick={handleLogout}>
               <LogoutIcon />

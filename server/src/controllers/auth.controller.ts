@@ -100,7 +100,7 @@ export const login = async (req: Request, res: Response) => {
         username: user.username,
         role: user.role,
         permissions: user.permissions,
-        profileImage: user.profileImage
+        profileImage: `/uploads/${user.profileImage}`
       }
     });
   } catch (error) {

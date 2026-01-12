@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import { useSetRecoilState } from "recoil";
 import { authUserState } from "./store/auth.store";
 import { getMe } from "./api/auth.api";
+import UserProfilePage from './pages/profile/UserProfilePage';
 
 
 
@@ -35,9 +36,10 @@ function App() {
     <BrowserRouter>
       <Navbar />
       <Routes>
+        <Route path="/" element={<CountriesPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
-        <Route path="/" element={<CountriesPage />} />
+        <Route path="/profile" element={<UserProfilePage />} />
         <Route path="/countries/new" element={<EditCountryPage />} />
         <Route path="/countries/:id" element={<EditCountryPage />} />
 
