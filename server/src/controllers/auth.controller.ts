@@ -113,17 +113,23 @@ export const getMe = async (req: Request, res: Response) => {
   if (!req.user) {
     return res.status(401).json({ message: "Unauthorized" });
   }
+  const userId = req.user!.userId;
 
-  const user = await User.findById(req.user.userId);
+  // const user = await User.findById(req.user.userId);
+  const user = await User.findById(userId).select(
+    "username email firstName lastName phone profileImage role permissions"
+  );
 
   if (!user) {
     return res.status(404).json({ message: "User not found" });
   }
+  
+  res.json(user);
 
-  res.json({
-    id: user._id,
-    username: user.username,
-    role: user.role,
-    permissions: user.permissions
-  });
+  // res.json({
+  //   id: user._id,
+  //   username: user.username,
+  //   role: user.role,
+  //   permissions: user.permissions
+  // });
 };

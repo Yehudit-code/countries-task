@@ -10,6 +10,9 @@ import { useSetRecoilState } from "recoil";
 import { authUserState } from "./store/auth.store";
 import { getMe } from "./api/auth.api";
 import UserProfilePage from './pages/profile/UserProfilePage';
+import PermissionRequestsPage from './pages/admin/PermissionRequestsPage';
+import PermissionsPage from './pages/admin/PermissionsPage';
+import UserProfilePageByAdmin from './pages/admin/UserProfilePageByAdmin';
 
 
 
@@ -42,6 +45,9 @@ function App() {
         <Route path="/profile" element={<UserProfilePage />} />
         <Route path="/countries/new" element={<EditCountryPage />} />
         <Route path="/countries/:id" element={<EditCountryPage />} />
+        <Route path="/permissions" element={<PermissionsPage />} />
+        <Route path="/admin/users/:id" element={<UserProfilePageByAdmin />} />
+        <Route path="/admin/requests" element={<PermissionRequestsPage />} />
 
       </Routes>
     </BrowserRouter>

@@ -15,8 +15,8 @@ export default function Navbar() {
     setUser(null);
     navigate("/login");
   };
-console.log(user);
-console.log(user?.profileImage);
+  console.log(user);
+  console.log("user?.profileImage", user?.profileImage);
 
   return (
     <AppBar position="static">

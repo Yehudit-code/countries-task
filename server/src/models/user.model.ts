@@ -65,7 +65,7 @@ const UserSchema = new Schema<UserDocument>(
     password: {
       type: String,
       required: true,
-      select: false // important: do not return password by default
+      select: false
     },
 
     role: {
