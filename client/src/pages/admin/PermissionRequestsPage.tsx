@@ -7,6 +7,7 @@ import {
   TableCell,
   TableHead,
   TableRow,
+  Chip,
 } from "@mui/material";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -14,6 +15,16 @@ import {
   fetchPermissionRequests,
   rejectRequest,
 } from "../../api/admin.api";
+import type { PermissionStatus } from "../../types/permissionRequest";
+
+const statusColorMap: Record<
+  PermissionStatus,
+  "default" | "success" | "error" | "warning"
+> = {
+  pending: "warning",
+  approved: "success",
+  rejected: "error",
+};
 
 export default function PermissionRequestsPage() {
   const queryClient = useQueryClient();
@@ -50,22 +61,29 @@ export default function PermissionRequestsPage() {
       </TableHead>
 
       <TableBody>
-        {data!.map((req) => (
-          <TableRow key={req._id}>
-            <TableCell>{req.user.name}</TableCell>
-            <TableCell>{req.permission}</TableCell>
-            <TableCell>{req.action}</TableCell>
-            <TableCell>{req.status}</TableCell>
+        {data!.map((request) => (
+          <TableRow key={request._id}>
+            <TableCell>{request.user.username}</TableCell>
+            <TableCell>{request.permission}</TableCell>
+            <TableCell>{request.action}</TableCell>
 
             <TableCell>
-              {req.status === "pending" && (
+              <Chip
+                label={request.status}
+                color={statusColorMap[request.status]}
+                variant="outlined"
+              />
+            </TableCell>
+
+            <TableCell>
+              {request.status === "pending" && (
                 <Stack direction="row" spacing={1}>
-                  <Button onClick={() => approve.mutate(req._id)}>
+                  <Button onClick={() => approve.mutate(request._id)}>
                     Approve
                   </Button>
                   <Button
                     color="error"
-                    onClick={() => reject.mutate(req._id)}
+                    onClick={() => reject.mutate(request._id)}
                   >
                     Reject
                   </Button>

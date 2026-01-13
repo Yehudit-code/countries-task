@@ -12,8 +12,12 @@ import {
   approveRequest,
   rejectRequest,
 } from "../controllers/permissionRequests.controller";
+import { authenticate } from "../middlewares/auth.middleware";
+import { isAdmin } from "../middlewares/isAdmin.middleware";
 
 const router = Router();
+
+router.use(authenticate, isAdmin);
 
 /* Users */
 router.get("/users", getAllUsersController);

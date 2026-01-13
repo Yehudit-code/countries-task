@@ -10,9 +10,10 @@ import { useSetRecoilState } from "recoil";
 import { authUserState } from "./store/auth.store";
 import { getMe } from "./api/auth.api";
 import UserProfilePage from './pages/profile/UserProfilePage';
-import PermissionRequestsPage from './pages/admin/PermissionRequestsPage';
-import PermissionsPage from './pages/admin/PermissionsPage';
-import UserProfilePageByAdmin from './pages/admin/UserProfilePageByAdmin';
+import AdminGuard from './components/guards/AdminGuard';
+import AdminRoutes from './AdminRoutes';
+import AccessPage from './pages/AccessPage';
+import AuthGuard from './components/guards/AuthGuard';
 
 
 
@@ -39,15 +40,21 @@ function App() {
     <BrowserRouter>
       <Navbar />
       <Routes>
-        <Route path="/" element={<CountriesPage />} />
+
+        <Route element={<AuthGuard />}>
+          <Route path="/" element={<CountriesPage />} />
+        </Route>
+        
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/profile" element={<UserProfilePage />} />
         <Route path="/countries/new" element={<EditCountryPage />} />
         <Route path="/countries/:id" element={<EditCountryPage />} />
-        <Route path="/permissions" element={<PermissionsPage />} />
-        <Route path="/admin/users/:id" element={<UserProfilePageByAdmin />} />
-        <Route path="/admin/requests" element={<PermissionRequestsPage />} />
+        <Route path="/access" element={<AccessPage />} />
+
+        <Route element={<AdminGuard />}>
+          <Route path="/admin/*" element={<AdminRoutes />} />
+        </Route>
 
       </Routes>
     </BrowserRouter>
