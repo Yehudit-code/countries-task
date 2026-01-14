@@ -14,5 +14,5 @@ export interface AuthUser {
 
 export const authUserState = atom<AuthUser | null>({
   key: "authUserState",
-  default: null,
+  default: undefined,
 });

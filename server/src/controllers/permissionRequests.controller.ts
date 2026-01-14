@@ -31,7 +31,7 @@ export const getPermissionRequestsController = async (
   res: Response
 ) => {
   const requests = await PermissionRequest.find()
-    .populate("user", "firstName lastName email")
+    .populate("user", "username firstName lastName email profileImage")
     .sort({ createdAt: -1 });
 
   res.status(200).json(requests);

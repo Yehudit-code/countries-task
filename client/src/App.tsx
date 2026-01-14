@@ -22,8 +22,10 @@ function App() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (!token) return;
-
+    if (!token) {
+      setUser(null);
+      return;
+    }
     getMe()
       .then((user) => {
         setUser(user);
@@ -44,7 +46,7 @@ function App() {
         <Route element={<AuthGuard />}>
           <Route path="/" element={<CountriesPage />} />
         </Route>
-        
+
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/profile" element={<UserProfilePage />} />

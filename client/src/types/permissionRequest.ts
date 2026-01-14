@@ -6,6 +6,7 @@ export interface PermissionRequest {
     lastName: string;
     email: string;
     username: string;
+    profileImage?: string;
   };
   permission: string;
   action: string;
