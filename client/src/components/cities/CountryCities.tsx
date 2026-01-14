@@ -39,11 +39,15 @@ export const CountryCities = ({
     const [editCityId, setEditCityId] = useState<string | null>(null);
     const [editName, setEditName] = useState("");
 
-
-    const { data: cities = [], isLoading } = useQuery({
+    const {
+        data: cities = [],
+        isLoading,
+        isError,
+    } = useQuery({
         queryKey: ["cities", countryId],
         queryFn: () => getCitiesByCountry(countryId),
     });
+
 
     const createMutation = useMutation({
         mutationFn: (name: string) => createCity(countryId, name),
@@ -86,6 +90,17 @@ export const CountryCities = ({
             </Box>
         );
     }
+
+    if (isError) {
+        return (
+            <Box mt={3}>
+                <Typography color="error">
+                    You do not have permission to view cities.
+                </Typography>
+            </Box>
+        );
+    }
+
 
     return (
         <Card sx={{ mt: 4 }}>

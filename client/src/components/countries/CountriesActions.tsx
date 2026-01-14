@@ -7,8 +7,6 @@ interface Props {
 }
 
 export default function CountriesActions({ canCreate, onAdd }: Props) {
-  if (!canCreate) return null;
-
   return (
     <Stack direction="row" spacing={2} mb={2} padding={2}>
       <Button
@@ -16,9 +14,11 @@ export default function CountriesActions({ canCreate, onAdd }: Props) {
         color="success"
         startIcon={<AddIcon />}
         onClick={onAdd}
+        disabled={!canCreate}
       >
         Add Country
       </Button>
     </Stack>
   );
 }
+

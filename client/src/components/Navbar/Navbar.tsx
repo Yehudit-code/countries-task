@@ -1,4 +1,12 @@
-import { AppBar, Toolbar, Typography, Box, Button } from "@mui/material";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Box,
+  Button,
+  Stack,
+  Avatar,
+} from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { useNavigate } from "react-router-dom";
@@ -15,8 +23,6 @@ export default function Navbar() {
     setUser(null);
     navigate("/login");
   };
-  console.log(user);
-  console.log("user?.profileImage", user?.profileImage);
 
   return (
     <AppBar position="static">
@@ -30,20 +36,58 @@ export default function Navbar() {
 
         {/* Center – title */}
         <Box sx={{ flexGrow: 1 }}>
-          <Typography variant="h6">
-            Countries Management
-          </Typography>
+          <Typography variant="h6">Countries Management</Typography>
         </Box>
+
+        {/* Navigation buttons */}
+        <Stack direction="row" spacing={1} alignItems="center" sx={{ mr: 2 }}>
+          {/* Home – visible to everyone */}
+          <Button color="inherit" onClick={() => navigate("/")}>
+            Home
+          </Button>
+
+          {/* Admin only */}
+          {user?.role === "admin" && (
+            <>
+              <Button
+                color="inherit"
+                onClick={() => navigate("/admin/permissions")}
+              >
+                Admin Permissions
+              </Button>
+              <Button
+                color="inherit"
+                onClick={() => navigate("/admin/requests")}
+              >
+                Requests
+              </Button>
+            </>
+          )}
+        </Stack>
 
         {/* Right side – auth actions */}
         {user ? (
           <>
-            <Typography sx={{ mr: 2 }}>
-              {user.username}
-            </Typography>
-            <Typography sx={{ mr: 2 }}>
-              <img src={user.profileImage} />
-            </Typography>
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ mr: 1 }}>
+              <Avatar
+                src={
+                  user.profileImage
+                    ? `/uploads/${user.profileImage}`
+                    : undefined
+                }
+                sx={{
+                  width: 32,
+                  height: 32,
+                  cursor: "pointer",
+                }}
+                onClick={() => navigate("/profile")}
+              >
+                {user.username.charAt(0)}
+              </Avatar>
+
+              <Typography>{user.username}</Typography>
+            </Stack>
+
             <Button color="inherit" onClick={handleLogout}>
               <LogoutIcon />
             </Button>
